@@ -19,7 +19,7 @@ This script assumes that each image file contains exactly one face and that all 
 
 This is a basic model for face detection and might not work well in all scenarios or with all types of images. For better results, stay tuned for deep learning models on my profile.
 
-The subdictionaries containing images were deleted for privacy. So user can add their own images with respective name as the subdictionary names were used as lebels.
+The subdictionaries containing images were deleted for privacy. So users have to add their own images with respective name as the subdictionary names were used as lebels.
 
 Please remember that working with images and especially with face detection and recognition has ethical considerations. Always ensure that you have permission to use and analyze the images and respect privacy.
 
