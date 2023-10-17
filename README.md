@@ -9,7 +9,7 @@ This project uses OpenCV's LBPH (Local Binary Patterns Histograms) Face Recogniz
 
 ## How to Run
 1. Organize your images in a directory such that each person's images are in a separate subdirectory. The name of the subdirectory should be the person's name. The original subdirectories containing images have been deleted for privacy reasons, so you can add your own images with respective names as the subdirectory names are used as labels.
-2. Replace `'path_to_your_directory'` in the script with the path to your directory containing the subdirectories of images.
+2. Replace `C:\Users\mebub_9a7jdi8\Desktop\Face Detection model\img"` in the script with the path to your directory containing the subdirectories of images.
 3. Run the script. It will load each image in each subdirectory into a list, and assign a label (the name of the image file without its extension) to each image.
 4. During live face recognition from your webcam feed, it will display this label on the rectangle around each detected face.
 5. When a face is detected for the first time, it will append this label and the current time to a text file named `output.txt`.
