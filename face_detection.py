@@ -1,7 +1,9 @@
-import cv2
+import cv2 
 import os
 from datetime import datetime
 import numpy as np
+import time
+
 # Load the cascade
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -11,6 +13,10 @@ dir_path = r"C:\Users\mebub_9a7jdi8\Desktop\Face Detection model\img"
 # Initialize empty lists to hold the images and labels
 images = []
 labels = []
+
+# Setting a threshold value
+thresholdValue = 127  # This is just an example value
+maxVal = 255  # This is just an example value
 
 # For each subdirectory in the directory
 for subdir in os.listdir(dir_path):
@@ -32,8 +38,14 @@ recognizer.train(np.array(images), np.array(list(range(len(labels)))))
 # Open video capture
 cap = cv2.VideoCapture(0)
 
-# Initialize an empty set to hold the labels of detected faces
-detected_faces = set()
+# Initialize a dictionary to hold start times for detected faces
+start_times = {}
+
+# Initialize a dictionary to hold end times for detected faces
+end_times = {}
+
+# Initialize a set to hold labels that have been written to file
+written_labels = set()
 
 # Open the output text file
 with open('output.txt', 'a') as f:
@@ -44,6 +56,12 @@ with open('output.txt', 'a') as f:
         # Convert into grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+        # Set a threshold
+        _, thresholded = cv2.threshold(gray, thresholdValue, maxVal, cv2.THRESH_BINARY)
+
+        # Detect faces on the thresholded image
+        faces = face_cascade.detectMultiScale(thresholded, 1.1, 4)
+
         # Detect faces
         faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
@@ -53,19 +71,24 @@ with open('output.txt', 'a') as f:
             roi_gray = gray[y:y+h, x:x+w]
 
             # Predict the ID of the face
-            id_, _ = recognizer.predict(roi_gray)
+            id_, conf = recognizer.predict(roi_gray)
 
-            # If this face has not been detected before
-            if labels[id_] not in detected_faces:
-                # Add it to the set of detected faces
-                detected_faces.add(labels[id_])
+            if labels[id_] not in start_times:
+                start_times[labels[id_]] = time.time()
+            end_times[labels[id_]] = time.time()  # Update end time whenever this face is detected
 
-                # Write the label and current time to the text file
-                f.write(f'{labels[id_]} was present at {datetime.now()}\n')
+            if end_times[labels[id_]] - start_times[labels[id_]] > 15 and labels[id_] not in written_labels:  # If this face has been detected continuously for more than 3 seconds and has not been written to file yet
+                f.write(f'{labels[id_]} was present at {datetime.now()}\n')  # Write to file
+                written_labels.add(labels[id_])  # Add label to written_labels set
+                print(f'{labels[id_]} is detected.')
 
             # Draw rectangle around the face and put text of the person's name (file name without extension)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-            cv2.putText(img, labels[id_], (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255,0,0), 2)
+            if conf < 40:  # You can adjust this confidence threshold as needed
+                cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
+                cv2.putText(img, labels[id_], (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255,0,0), 2)
+            else:
+                cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
+                cv2.putText(img, "Unknown", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0,0,255), 2)
 
         # Display the output
         cv2.imshow('img', img)
